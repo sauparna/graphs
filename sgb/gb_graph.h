@@ -24,6 +24,18 @@ typedef struct arc_struct {
   util a, b;                 /* multipurpose fields */
 } Arc;
 
+#define ID_FIELD_SIZE 161
+typedef struct graph_struct {
+  Vertex *vertices;            /* beginning of the vertex array */
+  long n;                      /* total number of vertices */
+  long m;                      /* total number of arcs */
+  char id[ID_FIELD_SIZE];      /* GraphBase identification */
+  char util_types[15];         /* usage of utility fields */
+  Area data;                   /* the main data blocks */
+  Area aux_data;               /* subsidiary data blocks */
+  util uu, vv, ww, xx, yy, zz; /* multipurpose fields */
+} Graph;
+
 #define init_area(s) *s = NULL;
 struct area_pointers {
   char *first; /* address of the beginning of this block  */
@@ -41,6 +53,12 @@ extern long verbose; /* nonzero if "verbose" output is desired */
 extern long
     panic_code; /* set nonzero if graph generator returns null pointer */
 extern long gb_trouble_code; /* anomalies noted by gb_alloc */
+extern long
+    extra_n; /* the number of shadow vertices allocated by gb_new_graph */
+extern char null_string[]; /* a null string constant */
+
+extern void make_compound_id(); /* routine to set one id field from another */
+extern void make_double_compound_id(); /* ditto, but from two others */
 
 #define alloc_fault (-1)    /* a previous memory request failed */
 #define no_room 1           /* the current memory request failed */
@@ -56,3 +74,7 @@ extern long gb_trouble_code; /* anomalies noted by gb_alloc */
 extern char *gb_alloc(); /* allocate another block for an area */
 #define gb_typed_alloc(n, t, s) (t *)gb_alloc((long)((n) * sizeof(t)), s)
 extern void gb_free(); /* deallocate all blocks for an area */
+
+#define n_1 uu.I /* utility field uu may denote size of bipartite first part   \
+                  */
+#define mark_bipartite(g, n1) g->n_1 = n1, g->util_types[8] = 'I'
