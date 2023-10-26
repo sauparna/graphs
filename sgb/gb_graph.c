@@ -1,6 +1,6 @@
 #include "gb_graph.h"
-#include <stdlib.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 
 /* <Preprocessor definitions> */
@@ -107,8 +107,9 @@ void make_double_compound_id(Graph *g, char *s1, Graph *gg, char *s2,
   int avail = ID_FIELD_SIZE - strlen(s1) - strlen(s2) - strlen(s3);
   if (strlen(gg->id) + strlen(ggg->id) < avail)
     sprintf(g->id, "%s%s%s%s%s", s1, gg->id, s2, ggg->id, s3);
-  else sprintf(g->id, "%s%.*s...)%s%.*s...)%s", s1, avail / 2 - 5, gg->id,
-               (avail - 9) / 2, ggg->id, s3);
+  else
+    sprintf(g->id, "%s%.*s...)%s%.*s...)%s", s1, avail / 2 - 5, gg->id,
+            (avail - 9) / 2, ggg->id, s3);
 }
 
 #define arcs_per_block 102
@@ -130,80 +131,102 @@ Arc *gb_virgin_arc() {
 
 /* A newly created arc will go from u to v, and its length is len. */
 void gb_new_arc(Vertex *u, Vertex *v, long len) {
-    Arc *cur_arc = gb_virgin_arc();
-    cur_arc->tip = v;
-    cur_arc->next = u->arcs;
-    cur_arc->len = len;
-    u->arcs = cur_arc;
-    cur_graph->m++;
+  Arc *cur_arc = gb_virgin_arc();
+  cur_arc->tip = v;
+  cur_arc->next = u->arcs;
+  cur_arc->len = len;
+  u->arcs = cur_arc;
+  cur_graph->m++;
 }
 
 /* New arcs will go from u to v and from v to u, and len is their length */
 void gb_new_edge(Vertex *u, Vertex *v, long len) {
-    Arc *cur_arc = gb_virgin_arc();
-    if (cur_arc != dummy_arc) next_arc++;
-    if (u < v) {
-        cur_arc->tip = v;
-        cur_arc->next = u->arcs;
-        (cur_arc + 1)->tip = u;
-        (cur_arc + 1)->next = v->arcs;
-        u->arcs = cur_arc;
-        v->arcs = cur_arc + 1;
-    } else {
-        (cur_arc + 1)->tip = v;
-        (cur_arc + 1)->next = u->arcs;
-        u->arcs = cur_arc + 1; /* do this now in case u = v */
-        cur_arc->tip = u;
-        cur_arc->next = v->arcs;
-        v->arcs = cur_arc;
-    }
-    cur_arc->len = (cur_arc + 1)->len = len;
-    cur_graph->m += 2;
+  Arc *cur_arc = gb_virgin_arc();
+  if (cur_arc != dummy_arc)
+    next_arc++;
+  if (u < v) {
+    cur_arc->tip = v;
+    cur_arc->next = u->arcs;
+    (cur_arc + 1)->tip = u;
+    (cur_arc + 1)->next = v->arcs;
+    u->arcs = cur_arc;
+    v->arcs = cur_arc + 1;
+  } else {
+    (cur_arc + 1)->tip = v;
+    (cur_arc + 1)->next = u->arcs;
+    u->arcs = cur_arc + 1; /* do this now in case u = v */
+    cur_arc->tip = u;
+    cur_arc->next = v->arcs;
+    v->arcs = cur_arc;
+  }
+  cur_arc->len = (cur_arc + 1)->len = len;
+  cur_graph->m += 2;
 }
 
 #define string_block_size 1016 /* 1024 - 8 is usually efficient */
 
 /* s is the string to be copied */
-char *gb_save_string(char* s) {
-    char *p = s;
-    long len; /* length of the string and the following null charater */
-    while (*p++); /* advance to the end of the string */
-    len = p - s;
-    p = next_string;
-    if (p + len > bad_string) { /* not enough room in the current block */
-        long size = string_block_size;
-        if (len > size) size = len;
-        p = gb_alloc(size, cur_graph->data);
-        if (p == NULL) return null_string; /* return a pointer to "" if memory ran out */
-        bad_string = p + size;
-    }
-    while (*s) *p++ = *s++; /* copy the non-null bytes of the string */
-    *p++ = '\0'; /* and append a null character */
-    next_string = p;
-    return p - len;
+char *gb_save_string(char *s) {
+  char *p = s;
+  long len; /* length of the string and the following null charater */
+  while (*p++)
+    ; /* advance to the end of the string */
+  len = p - s;
+  p = next_string;
+  if (p + len > bad_string) { /* not enough room in the current block */
+    long size = string_block_size;
+    if (len > size)
+      size = len;
+    p = gb_alloc(size, cur_graph->data);
+    if (p == NULL)
+      return null_string; /* return a pointer to "" if memory ran out */
+    bad_string = p + size;
+  }
+  while (*s)
+    *p++ = *s++; /* copy the non-null bytes of the string */
+  *p++ = '\0';   /* and append a null character */
+  next_string = p;
+  return p - len;
 }
 
 void switch_to_graph(Graph *g) {
-    cur_graph->ww.A = next_arc;
-    cur_graph->xx.A = bad_arc;
-    cur_graph->yy.S = next_string;
-    cur_graph->zz.S = bad_string;
-    cur_graph = (g ? g : &dummy_graph);
-    next_arc = cur_graph->ww.A;
-    bad_arc = cur_graph->xx.A;
-    next_string = cur_graph->yy.S;
-    bad_string = cur_graph->zz.S;
-    cur_graph->ww.A = NULL;
-    cur_graph->xx.A = NULL;
-    cur_graph->yy.S = NULL;
-    cur_graph->zz.S = NULL;
+  cur_graph->ww.A = next_arc;
+  cur_graph->xx.A = bad_arc;
+  cur_graph->yy.S = next_string;
+  cur_graph->zz.S = bad_string;
+  cur_graph = (g ? g : &dummy_graph);
+  next_arc = cur_graph->ww.A;
+  bad_arc = cur_graph->xx.A;
+  next_string = cur_graph->yy.S;
+  bad_string = cur_graph->zz.S;
+  cur_graph->ww.A = NULL;
+  cur_graph->xx.A = NULL;
+  cur_graph->yy.S = NULL;
+  cur_graph->zz.S = NULL;
 }
 
 void gb_recycle(Graph *g) {
-    if (g) {
-        gb_free(g->data);
-        gb_free(g->aux_data);
-        free((char*)g); /* the user must not refer to g again */
-    }
+  if (g) {
+    gb_free(g->data);
+    gb_free(g->aux_data);
+    free((char *)g); /* the user must not refer to g again */
+  }
 }
 
+void hash_in(Vertex *v) {
+    char *t = v->name;
+    Vertex *u;
+
+    /* <Find vertex u, whose location is the hash code for string t 45> */
+    {
+        long h;
+        for (h = 0; *t; t++) {
+            h += (h ^ (h >> 1)) + HASH_MULT * (unsigned char) *t;
+            while (h >= HASH_PRIME) h -= HASH_PRIME;
+        }
+        u = cur_graph->vertices + (h % cur_graph->n);
+    }
+    
+    v->hash_link = u->hash_head;
+    u->hash_head = v;
+}

@@ -57,8 +57,12 @@ extern long
     extra_n; /* the number of shadow vertices allocated by gb_new_graph */
 extern char null_string[]; /* a null string constant */
 
-extern void make_compound_id(Graph *g, char *s1, Graph *gg, char *s2); /* routine to set one id field from another */
-extern void make_double_compound_id(Graph *g, char *s1, Graph *gg, char *s2, Graph *ggg, char *s3); /* ditto, but from two others */
+extern void
+make_compound_id(Graph *g, char *s1, Graph *gg,
+                 char *s2); /* routine to set one id field from another */
+extern void make_double_compound_id(Graph *g, char *s1, Graph *gg, char *s2,
+                                    Graph *ggg,
+                                    char *s3); /* ditto, but from two others */
 
 #define alloc_fault (-1)    /* a previous memory request failed */
 #define no_room 1           /* the current memory request failed */
@@ -70,22 +74,30 @@ extern void make_double_compound_id(Graph *g, char *s1, Graph *gg, char *s2, Gra
 #define missing_operand 50  /* graph parameter is NULL */
 #define invalid_operand 60  /* graph parameter doesn't obey assumptions */
 #define impossible 90       /* "this can't happen" */
+#define hash_link u.V
+#define hash_head v.V
+#define HASH_MULT 314159 /* random multiplier */
+#define HASH_PRIME 516595003 /* the 27182818th prime; it's less than 2^29 */
 
-#define n_1 uu.I /* utility field uu may denote size of bipartite first part   \
-                  */
+#define n_1                                                                    \
+  uu.I /* utility field uu may denote size of bipartite first part             \
+        */
 #define mark_bipartite(g, n1) g->n_1 = n1, g->util_types[8] = 'I'
 
 typedef unsigned long siz_t; /* basic machine address, as signless integer */
-extern siz_t edge_trick; /* least significant 1 bit in sizeof(Arc) */
+extern siz_t edge_trick;     /* least significant 1 bit in sizeof(Arc) */
 
 extern Graph *gb_new_graph(long n); /* create a new graph structure */
-extern void gb_new_arc(Vertex *u, Vertex *v, long len); /* append an arc to the current graph */
-extern Arc *gb_virgin_arc(); /* allocate a new Arc record */
-extern void gb_new_edge(Vertex *u, Vertex *v, long len); /* append an edge (two arcs) to the current graph */
-extern char *gb_save_string(char* s); /* store a string in the current graph */
-extern void switch_to_graph(Graph *g); /* save allocation variables, swap in others */
-extern void gb_recycle(Graph *g); /* delete a graph structure */
+extern void gb_new_arc(Vertex *u, Vertex *v,
+                       long len); /* append an arc to the current graph */
+extern Arc *gb_virgin_arc();      /* allocate a new Arc record */
+extern void
+gb_new_edge(Vertex *u, Vertex *v,
+            long len); /* append an edge (two arcs) to the current graph */
+extern char *gb_save_string(char *s); /* store a string in the current graph */
+extern void
+switch_to_graph(Graph *g); /* save allocation variables, swap in others */
+extern void gb_recycle(Graph *g);      /* delete a graph structure */
 extern char *gb_alloc(long n, Area s); /* allocate another block for an area */
 #define gb_typed_alloc(n, t, s) (t *)gb_alloc((long)((n) * sizeof(t)), s)
 extern void gb_free(Area s); /* deallocate all blocks for an area */
-
