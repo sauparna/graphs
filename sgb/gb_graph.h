@@ -3,6 +3,12 @@
 
 /* <Type declarations 8> */
 
+/* The Area type is defined to be an array of length 1. This makes it
+ * possible for users to say just 's' instead of '&s' when using an
+ * area variable as a parameter. */
+
+typedef struct area_pointers *Area[1];
+
 typedef union {
   struct vertex_struct *V; /* pointer to Vertex */
   struct arc_struct *A;    /* pointer to Arc */
@@ -43,12 +49,6 @@ struct area_pointers {
       *next; /* address of area pointers in the previously allocated block  */
 };
 
-/* The Area type is defined to be an array of length 1. This makes it
- * possible for users to say just 's' instead of '&s' when using an
- * area variable as a parameter. */
-
-typedef struct area_pointers *Area[1];
-
 extern long verbose; /* nonzero if "verbose" output is desired */
 extern long
     panic_code; /* set nonzero if graph generator returns null pointer */
@@ -57,8 +57,8 @@ extern long
     extra_n; /* the number of shadow vertices allocated by gb_new_graph */
 extern char null_string[]; /* a null string constant */
 
-extern void make_compound_id(); /* routine to set one id field from another */
-extern void make_double_compound_id(); /* ditto, but from two others */
+extern void make_compound_id(Graph *g, char *s1, Graph *gg, char *s2); /* routine to set one id field from another */
+extern void make_double_compound_id(Graph *g, char *s1, Graph *gg, char *s2, Graph *ggg, char *s3); /* ditto, but from two others */
 
 #define alloc_fault (-1)    /* a previous memory request failed */
 #define no_room 1           /* the current memory request failed */
@@ -71,10 +71,21 @@ extern void make_double_compound_id(); /* ditto, but from two others */
 #define invalid_operand 60  /* graph parameter doesn't obey assumptions */
 #define impossible 90       /* "this can't happen" */
 
-extern char *gb_alloc(); /* allocate another block for an area */
-#define gb_typed_alloc(n, t, s) (t *)gb_alloc((long)((n) * sizeof(t)), s)
-extern void gb_free(); /* deallocate all blocks for an area */
-
 #define n_1 uu.I /* utility field uu may denote size of bipartite first part   \
                   */
 #define mark_bipartite(g, n1) g->n_1 = n1, g->util_types[8] = 'I'
+
+typedef unsigned long siz_t; /* basic machine address, as signless integer */
+extern siz_t edge_trick; /* least significant 1 bit in sizeof(Arc) */
+
+extern Graph *gb_new_graph(long n); /* create a new graph structure */
+extern void gb_new_arc(Vertex *u, Vertex *v, long len); /* append an arc to the current graph */
+extern Arc *gb_virgin_arc(); /* allocate a new Arc record */
+extern void gb_new_edge(Vertex *u, Vertex *v, long len); /* append an edge (two arcs) to the current graph */
+extern char *gb_save_string(char* s); /* store a string in the current graph */
+extern void switch_to_graph(Graph *g); /* save allocation variables, swap in others */
+extern void gb_recycle(Graph *g); /* delete a graph structure */
+extern char *gb_alloc(long n, Area s); /* allocate another block for an area */
+#define gb_typed_alloc(n, t, s) (t *)gb_alloc((long)((n) * sizeof(t)), s)
+extern void gb_free(Area s); /* deallocate all blocks for an area */
+
