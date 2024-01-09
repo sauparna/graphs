@@ -1,3 +1,4 @@
+CC = clang
 KERNELFILES = gb_flip.c gb_graph.c
 ALL = $(KERNELFILES)
 
