@@ -230,3 +230,51 @@ void hash_in(Vertex *v) {
     v->hash_link = u->hash_head;
     u->hash_head = v;
 }
+
+Vertex *hash_out(char *s) {
+    char *t = s;
+    Vertex *u;
+    
+    /* <Find vertex u, whose location is the hash code for string t 45> */
+    {
+        long h;
+        for (h = 0; *t; t++) {
+            h += (h ^ (h >> 1)) + HASH_MULT * (unsigned char) *t;
+            while (h >= HASH_PRIME) h -= HASH_PRIME;
+        }
+        u = cur_graph->vertices + (h % cur_graph->n);
+    }
+
+    for (u = u->hash_head; u; u = u->hash_link)
+        if (strcmp(s, u->name) == 0)
+            return u;
+
+    return NULL; /* no found */
+}
+
+void hash_setup(Graph *g) {
+    Graph *save_cur_graph;
+    if (g && g->n > 0) {
+        Vertex *v;
+        save_cur_graph = cur_graph;
+        cur_graph = g;
+        for (v = g->vertices; v < g->vertices + g->n; v++) v->hash_head = NULL;
+        for (v = g->vertices; v < g->vertices + g->n; v++) hash_in(v);
+        g->util_types[0] = g->util_types[1] = 'V'; /* indicate usage of hash_head and hash_link */
+        cur_graph = save_cur_graph;
+    }
+}
+
+Vertex* hash_lookup(char *s, Graph *g) {
+    Graph *save_cur_graph;
+    if (g && g->n > 0) {
+        Vertex *v;
+        save_cur_graph = cur_graph;
+        cur_graph = g;
+        v = hash_out(s);
+        cur_graph = save_cur_graph;
+        return v;
+    }
+    else
+        return NULL;
+}
