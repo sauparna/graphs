@@ -98,4 +98,32 @@ long gb_eof() {
     return !more_data;
 }
 
+char gb_char() {
+    if (*cur_pos) return (*cur_pos++);
+    return '\n';
+}
 
+void gb_backup() {
+    if (cur_pos > buffer) cur_pos--;
+}
+
+long gb_digit(char d) {
+    if (icode[*cur_pos] < d) return icode[*cur_pos++];
+    return -1;
+}
+
+unsigned long gb_number(char d) {
+    unsigned long a = 0;
+    icode[0] = d; /* make sure '\0' is a nondigit */
+    while (icode[*cur_pos] < d) a = a * d + icode[*cur_pos++];
+    return a;
+}
+
+#define STR_BUF_LENGTH 160 /* users can put string here if they wish */
+
+/* p is where to put the result, and c is the character following the string */
+char *gb_string(char *p, char c) {
+    while (*cur_pos && *cur_pos != c) *p++ = *cur_pos++;
+    *p++ = 0;
+    return p;
+}
