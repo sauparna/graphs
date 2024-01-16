@@ -40,6 +40,8 @@ static char more_data; /* is there data still waiting to be read? */
 static char *imap = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ\
 abcdefghijklmnopqrstuvwxyz_^~&@@,;.:?!%#$+-*/|\\<=>()[]{}`'\" \n";
 
+static char file_name[20]; /* name of the data file, without a prefix */
+
 /* <Internal functions 9> */
 
 static void fill_buf() {
@@ -73,9 +75,8 @@ char imap_chr(long d) {
 }
 
 long imap_ord(char c) {
-    /* <Make sure icode has been initialized 4> */
-    if (!icode['1'])
-        icode_setup();
+    /* <Make sure icode has been initialized 14> */
+    if (!icode['1']) icode_setup();
     return (c < 0 || c > 255) ? unexpected_char : icode[c];
 }
 
@@ -119,11 +120,90 @@ unsigned long gb_number(char d) {
     return a;
 }
 
-#define STR_BUF_LENGTH 160 /* users can put string here if they wish */
+#define STR_BUF_LENGTH 160 
+char str_buf[STR_BUF_LENGTH]; /* users can put string here if they wish */
 
 /* p is where to put the result, and c is the character following the string */
 char *gb_string(char *p, char c) {
     while (*cur_pos && *cur_pos != c) *p++ = *cur_pos++;
     *p++ = 0;
     return p;
+}
+
+void gb_raw_open(char *f) {
+    
+    /* <Make sure icode has been initialized 14> */
+    if (!icode['1']) icode_setup();
+
+    /* <Try to open f 31> */
+    cur_file = fopen(f, "r");
+    #ifdef DATA_DIRECTORY
+    if (!cur_file && (strlen(DATA_DIRECTORY) + strlen(f) < STR_BUF_LENGTH)) {
+        sprintf(str_buf, "%s%s", DATA_DIRECTORY, f);
+        cur_file = fopen(str_buf, "r");
+    }
+#endif /* DATA_DIRECTORY */
+    
+    if (cur_file) {
+        io_errors = 0;
+        more_data = 1;
+        line_no = magic = 0;
+        tot_lines = 0x7fffffff; /* allow "infinitely many" lines */
+        fill_buf();
+    } else io_errors = cant_open_file;
+}
+
+long gb_open(char *f) {
+    strncpy(file_name, f, 19); /* save the name for use by gb_close */
+    gb_raw_open(f);
+    if (cur_file) {
+
+        /* <Check the first line; return if unsuccessful 34> */
+        sprintf(str_buf, "* File \"%s\"", f);
+        if (strncmp(buffer, str_buf, strlen(str_buf))) return (io_errors |= bad_first_line);
+        
+        /* <Check the second line; return if unsuccessful 35> */
+        fill_buf();
+        if (*buffer != '*') return (io_errors |= bad_second_line);
+
+        /* <Check the third line; return if unsuccessful 36> */
+        fill_buf();
+        if (*buffer != '*') return (io_errors |= bad_third_line);
+
+        /* <Check the fourth line; return if unsuccessful 37> */
+        fill_buf();
+        if (strncmp(buffer, "* (Checksum parameters ", 23)) return (io_errors |= bad_fourth_line);
+        cur_pos += 23;
+        tot_lines = gb_number(10);
+        if (gb_char() != ',') return (io_errors |= bad_fourth_line);
+        final_magic = gb_number(10);
+        if (gb_char() != ')') return (io_errors |= bad_fourth_line);
+        
+        gb_newline(); /* the first line of real data is now in the buffer */
+    }
+    return io_errors;
+}
+
+long gb_close() {
+    if (!cur_file) return (io_errors |= no_file_open);
+    fill_buf();
+    sprintf(str_buf, "* End of file \"%s\"", file_name);
+    if (strncmp(buffer, str_buf, strlen(str_buf))) io_errors |= bad_last_line;
+    more_data = buffer[0] = 0; /* now the GB_IO routines are effectively shut down */
+    /* we have cur_pos = buffer */
+    if (fclose(cur_file) != 0) return (io_errors |= cant_close_file);
+    cur_file = NULL;
+    if (line_no != tot_lines + 1) return (io_errors |= wrong_number_of_lines);
+    if (magic != final_magic) return (io_errors |= wrong_checksum);
+    return io_errors;
+}
+
+long gb_raw_close() {
+    if (cur_file) {
+        fclose(cur_file);
+        more_data = buffer[0] = 0;
+        cur_pos = buffer;
+        cur_file = NULL;
+    }
+    return magic;
 }
