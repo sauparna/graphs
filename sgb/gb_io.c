@@ -5,7 +5,7 @@
 #define bad_third_line 0x10 /* bit set if the third line is awry */
 #define bad_fourth_line 0x20 /* guess when this bit is set */
 #define file_ended_prematurely 0x40 /* bit set if fgets fails */
-#define missing_newline 0x80 /* bit set if line is too int or '\n' is missing */
+#define missing_newline 0x80 /* bit set if line is too long or '\n' is missing */
 #define wrong_number_of_lines 0x100 /* bit set if the line count is wrong */
 #define wrong_checksum 0x200 /* bit set if the check sum is wrong */
 #define no_file_open 0x400 /* bit set if the user tries to close an unopened file */
@@ -22,7 +22,7 @@
 
 /* <External declarations 5> */
 
-int io_errors; /* record of anomalies noted by GB_IO routines */
+long io_errors; /* record of anomalies noted by GB_IO routines */
 
 /* <Private declarations 8> */
 
@@ -30,11 +30,11 @@ static char buffer[81]; /* the current line of input */
 static char *cur_pos = buffer; /* the current character of interest */
 static FILE *cur_file; /* current file, or NULL if none is open */
 static char icode[256]; /* mapping of characters to internal codes */
-static int checksum_prime = (1L << 30) - 83; /* large prime such that 2p + 100 won't overflow */
-static int magic; /* current checksum value */
-static int line_no; /* current line number in file */
-static int final_magic; /* desired final magic number */
-static int tot_lines; /* total number of data lines */
+static long checksum_prime = (1L << 30) - 83; /* large prime such that 2p + 100 won't overflow */
+static long magic; /* current checksum value */
+static long line_no; /* current line number in file */
+static long final_magic; /* desired final magic number */
+static long tot_lines; /* total number of data lines */
 static char more_data; /* is there data still waiting to be read? */
 
 static char *imap = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ\
@@ -62,7 +62,7 @@ static void fill_buf() {
 }
 
 static void icode_setup() {
-    int k;
+    long k;
     char *p;
     for (k = 0; k < 256; k++) icode[k] = unexpected_char;
     for (p = imap, k = 0; *p; p++, k++) icode[*p] = k;
@@ -70,18 +70,18 @@ static void icode_setup() {
 
 /* <External functions 12> */
 
-char imap_chr(int d) {
+char imap_chr(long d) {
     return d < 0 || d > strlen(imap) ? '\0' : imap[d];
 }
 
-int imap_ord(char c) {
+long imap_ord(char c) {
     /* <Make sure icode has been initialized 14> */
     if (!icode['1']) icode_setup();
     return (c < 0 || c > 255) ? unexpected_char : icode[c];
 }
 
-int new_checksum(char *s, int old_checksum) {
-    int a = old_checksum;
+long new_checksum(char *s, long old_checksum) {
+    long a = old_checksum;
     char *p;
     for (p = s; *p; p++) a = (a + a + icode[*p]) % checksum_prime;
     return a;
@@ -95,7 +95,7 @@ void gb_newline() {
     }
 }
 
-int gb_eof() {
+long gb_eof() {
     return !more_data;
 }
 
@@ -108,13 +108,13 @@ void gb_backup() {
     if (cur_pos > buffer) cur_pos--;
 }
 
-int gb_digit(char d) {
+long gb_digit(char d) {
     if (icode[*cur_pos] < d) return icode[*cur_pos++];
     return -1;
 }
 
-unsigned int gb_number(char d) {
-    unsigned int a = 0;
+unsigned long gb_number(char d) {
+    unsigned long a = 0;
     icode[0] = d; /* make sure '\0' is a nondigit */
     while (icode[*cur_pos] < d) a = a * d + icode[*cur_pos++];
     return a;
@@ -153,7 +153,7 @@ void gb_raw_open(char *f) {
     } else io_errors = cant_open_file;
 }
 
-int gb_open(char *f) {
+long gb_open(char *f) {
     strncpy(file_name, f, 19); /* save the name for use by gb_close */
     gb_raw_open(f);
     if (cur_file) {
@@ -184,7 +184,7 @@ int gb_open(char *f) {
     return io_errors;
 }
 
-int gb_close() {
+long gb_close() {
     if (!cur_file) return (io_errors |= no_file_open);
     fill_buf();
     sprintf(str_buf, "* End of file \"%s\"", file_name);
@@ -198,7 +198,7 @@ int gb_close() {
     return io_errors;
 }
 
-int gb_raw_close() {
+long gb_raw_close() {
     if (cur_file) {
         fclose(cur_file);
         more_data = buffer[0] = 0;
