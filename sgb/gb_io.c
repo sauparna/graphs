@@ -30,7 +30,7 @@ static char buffer[81]; /* the current line of input */
 static char *cur_pos = buffer; /* the current character of interest */
 static FILE *cur_file; /* current file, or NULL if none is open */
 static char icode[256]; /* mapping of characters to internal codes */
-static int checksum_prime = (1L << 30) - 83; /* large prime such that 2p + 100 won't overflow */
+static int checksum_prime = (1 << 30) - 83; /* large prime such that 2p + 100 won't overflow */
 static int magic; /* current checksum value */
 static int line_no; /* current line number in file */
 static int final_magic; /* desired final magic number */
@@ -194,8 +194,8 @@ int gb_close() {
     if (fclose(cur_file) != 0) return (io_errors |= cant_close_file);
     cur_file = NULL;
     if (line_no != tot_lines + 1) return (io_errors |= wrong_number_of_lines);
-    // if (magic != final_magic) return (io_errors |= wrong_checksum);
     printf("WARNING: Checksum check is disabled until checksum-computation is fixed.\n");
+    // if (magic != final_magic) return (io_errors |= wrong_checksum);
     return io_errors;
 }
 
