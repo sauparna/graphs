@@ -20,7 +20,7 @@ CFLAGS = -g -I$(INCLUDEDIR)
 ########## You shouldn't have to change anything after this point ##########
 
 CC = clang
-KERNELFILES = gb_flip.c gb_graph.c gb_io.c
+KERNELFILES = gb_flip.c gb_graph.c gb_io.c gb_dijk.c
 ALL = $(KERNELFILES)
 
 OBJS = $(KERNELFILES:.c=.o)
