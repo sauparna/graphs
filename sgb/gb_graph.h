@@ -76,7 +76,7 @@ extern void make_double_compound_id(Graph *g, char *s1, Graph *gg, char *s2,
 #define impossible 90       /* "this can't happen" */
 #define hash_link u.V
 #define hash_head v.V
-#define HASH_MULT 314159 /* random multiplier */
+#define HASH_MULT 314159     /* random multiplier */
 #define HASH_PRIME 516595003 /* the 27182818th prime; it's less than 2^29 */
 
 #define n_1                                                                    \
