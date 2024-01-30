@@ -29,8 +29,10 @@ void enlist(Vertex *v, long d) {
 
 void reenlist(Vertex *v, long d) {
   Vertex *t = v->llink;
-  (t->rlink = v->rlink)->llink = v->llink;
+  (t->rlink = v->rlink)->llink = v->llink; /* remove v */
+  v->dist = d; /* we assume that the new dist is smaller than it was before */
   while (d < t->dist) t = t->llink;
+  v->llink = t;
   (v->rlink = t->rlink)->llink = v;
   t->rlink = v;
 }
