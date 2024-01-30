@@ -36,6 +36,9 @@ libgb.a: $(OBJS)
 gb_io.o: gb_io.c
 	$(CC) $(CFLAGS) -DDATA_DIRECTORY=\"$(DATADIR)/\" -c gb_io.c
 
+test_queue: gb_dijk.o gb_graph.o
+	$(CC) $(CFLAGS) test_queue.c gb_dijk.o gb_graph.o -o test_queue
+
 test_io: gb_io.o
 	$(CC) $(CFLAGS) test_io.c gb_io.o -o test_io
 
