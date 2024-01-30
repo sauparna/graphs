@@ -4,6 +4,10 @@ extern void print_dijkstra_result(Vertex *vv); /* procedure to display the answe
 #define dist z.I
 #define backlink y.V
 #define hh_val x.I
+#define llink v.V
+#define rlink w.V
+
+extern Vertex head[];
 
 extern void (*init_queue)(long); /* create an empty priority queue for dijkstra */
 extern void (*enqueue)(Vertex *, long); /* insert a new element in the priority queue */
