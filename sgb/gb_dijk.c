@@ -1,16 +1,17 @@
-#include "gb_graph.h"
 #include "gb_dijk.h"
+#include "gb_graph.h"
 
 /* <Preprocessor definitions> */
 
 #define dist                                                                   \
   z.I /* distance from uu, modified by hh, appears in vertex utility field z   \
        */
-#define backlink y.V /* pointer to previous vertex appears in utility field y  \
-                      */
-#define hh_val x.I   /* computed value of hh(v) */
-#define llink v.V    /* llink is stored in utility field v of a vertex */
-#define rlink w.V    /* rlink is stored in utility field w of a vertex */
+#define backlink                                                               \
+  y.V              /* pointer to previous vertex appears in utility field y    \
+                    */
+#define hh_val x.I /* computed value of hh(v) */
+#define llink v.V  /* llink is stored in utility field v of a vertex */
+#define rlink w.V  /* rlink is stored in utility field w of a vertex */
 
 /* <Priority queue procedures 16> */
 

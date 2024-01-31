@@ -2,7 +2,8 @@
 #define cant_close_file 0x2 /* bit set if fclose fails */
 #define bad_first_line                                                         \
   0x4 /* bit set if the data file's first line isn't legit */
-#define bad_second_line 0x8  /* bit set if the second line doesn't pass muster \
+#define bad_second_line                                                        \
+  0x8                        /* bit set if the second line doesn't pass muster \
                               */
 #define bad_third_line 0x10  /* bit set if the third line is awry */
 #define bad_fourth_line 0x20 /* guess when this bit is set */

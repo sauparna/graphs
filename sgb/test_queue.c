@@ -1,5 +1,5 @@
-#include "gb_graph.h"
 #include "gb_dijk.h"
+#include "gb_graph.h"
 
 #define FAIL 0
 #define PASS 1
