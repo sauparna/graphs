@@ -1,5 +1,5 @@
-#include "gb_dijk.h"
 #include "gb_graph.h"
+#include "gb_dijk.h"
 
 /* <Preprocessor definitions> */
 
