@@ -1,14 +1,13 @@
-#include "gb_dijk.h"
 #include "gb_graph.h"
+#include "gb_dijk.h"
 
 #define FAIL 0
 #define PASS 1
 
-void PrintPriorityQueue();
-int TestHeadAndTailLinks();
-void TestPriorityQueue();
+void print_priority_queue();
+int test_head_and_tail_links();
 
-void PrintPriorityQueue() {
+void print_priority_queue() {
   if (head->rlink == head) {
     fprintf(stderr, "Can't print, the priority queue is empty!\n");
     return;
@@ -23,7 +22,7 @@ void PrintPriorityQueue() {
   fprintf(stderr, "\n[queue size = %d]\n", c);
 }
 
-int TestHeadAndTailLinks() {
+int test_head_and_tail_links() {
   if (head->llink->rlink == head) {
     fprintf(stderr, "  PASS: The head's llink points to the tail and the "
                     "tail's rlink points to the head.\n");
@@ -34,8 +33,7 @@ int TestHeadAndTailLinks() {
   }
 }
 
-void TestPriorityQueue() {
-
+int main() {
   int test_count = 0;
 
   (*init_queue)(0L);
@@ -54,16 +52,16 @@ void TestPriorityQueue() {
     fprintf(stderr, "  PASS: The first element has dist = 1.\n");
   } else {
     fprintf(stderr, "  FAIL: The first element's dist is not 1.!\n");
-    return;
+    return -1;
   }
   if (head->llink->dist == 1023) {
     fprintf(stderr, "  PASS: The tail element has dist = 1023.\n");
   } else {
     fprintf(stderr, "  FAIL: The tail element's dist is not 1023!\n");
-    return;
+    return -2;
   }
-  if (TestHeadAndTailLinks() == FAIL)
-    return;
+  if (test_head_and_tail_links() == FAIL)
+    return -3;
   fprintf(stderr, "Insert an element with dist = 0.\n");
   (*enqueue)(&v[0], 0);
   if (head->rlink->dist == 0) {
@@ -72,10 +70,10 @@ void TestPriorityQueue() {
   } else {
     fprintf(stderr, "  FAIL: The smallest element enqueue queued could not be "
                     "found at the correct location!\n");
-    return;
+    return -4;
   }
-  if (TestHeadAndTailLinks() == FAIL)
-    return;
+  if (test_head_and_tail_links() == FAIL)
+    return -5;
 
   fprintf(stderr, "The queue looks structurally sound, which asserts that "
                   "enqueu works correctly.\n");
@@ -92,17 +90,17 @@ void TestPriorityQueue() {
     } else {
       fprintf(stderr, "  FAIL: The tail element is not to be found in the "
                       "expected position after a requeue!\n");
-      return;
+      return -6;
     }
     if (requeued_element->dist == 2) {
       fprintf(stderr, "  PASS: The requeued element's dist is correct.\n");
     } else {
       fprintf(stderr,
               "  FAIL: The requeued element's dist was not correctly set.\n");
-      return;
+      return -7;
     }
-    if (TestHeadAndTailLinks() == FAIL)
-      return;
+    if (test_head_and_tail_links() == FAIL)
+      return -8;
   }
   fprintf(stderr, "requeue works correctly.\n");
 
@@ -115,17 +113,17 @@ void TestPriorityQueue() {
       fprintf(stderr, "  PASS: The first element was correctly removed.\n");
     } else {
       fprintf(stderr, "  FAIL: The wrong element was removed!\n");
-      return;
+      return -9;
     }
     if (head->rlink == old_second_element) {
       fprintf(stderr, "  PASS: del_min left the queue in the correct state.\n");
     } else {
       fprintf(stderr,
               "  FAIL: del_min left the queue in an inconcistent state!\n");
-      return;
+      return -10;
     }
-    if (TestHeadAndTailLinks() == FAIL)
-      return;
+    if (test_head_and_tail_links() == FAIL)
+      return -11;
   }
   fprintf(stderr, "del_min works correctly.\n");
 
@@ -133,9 +131,6 @@ void TestPriorityQueue() {
           "OK, the priority queue implementation in GB_DIJK seem to work! "
           "(Passes all %d tests.)\n",
           test_count);
-}
 
-int main() {
-  TestPriorityQueue();
   return 0;
 }
