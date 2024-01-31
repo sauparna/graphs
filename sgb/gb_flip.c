@@ -9,6 +9,7 @@ static long A[56] = {-1}; /* pseudo-random values */
 long *gb_fptr = A; /* the next A value to be exported */
 
 #define mod_diff(x, y) (((x) - (y)) & 0x7fffffff) /* difference modulo 2^31 */
+#define gb_next_rand() (*gb_fptr >= 0 ? *gb_fptr-- : gb_flip_cycle())
 
 /* <External functions> */
 long gb_flip_cycle() {
