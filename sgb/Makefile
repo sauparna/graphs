@@ -48,16 +48,17 @@ test_graph: gb_graph.o
 test_flip: gb_flip.o
 	$(CC) $(CFLAGS) test_flip.c gb_flip.o -o test_flip
 
-tests: test_io test_graph test_flip
+tests: test_io test_graph test_flip test_queue
 	./test_io
 	./test_graph
 	./test_flip
+	./test_queue
 	make lib
 	make test_sample
 	- ./test_sample > sample.out
 	diff test.gb test.correct
 	diff sample.out sample.correct
-	rm test.gb sample.out test_io test_graph test_flip test_sample
+	rm test.gb sample.out test_io test_graph test_flip test_queue test_sample
 	echo "Congratulations --- the tests have all been passed."
 	touch certified
 
